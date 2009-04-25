@@ -1,0 +1,31 @@
+load ./opengl.so
+set argcp [newintv1 1]
+set argvp [newstrv1 "tester"]
+glutInit $argcp $argvp
+glutInitDisplayMode [expr {$GLUT_SINGLE | $GLUT_RGBA | $GLUT_DEPTH }]
+glutInitWindowPosition 0 0
+glutInitWindowSize 500 500
+glutCreateWindow "Lit-Torus"
+# Set up the material properties
+set mat_specular [newfv4 1.0 1.0 1.0 1.0]
+set mat_shininess [newfv4 50.0 0 0 0]
+set light_position [newfv4 1.0 1.0 1.0 0.0]
+glMaterialfv $GL_FRONT $GL_SPECULAR $mat_specular
+glMaterialfv $GL_FRONT $GL_SHININESS $mat_shininess
+glLightfv $GL_LIGHT0 $GL_POSITION $light_position
+glEnable $GL_LIGHTING
+glEnable $GL_LIGHT0
+glDepthFunc $GL_LEQUAL
+glEnable $GL_DEPTH_TEST
+# Set up view
+glClearColor 0 0 0 0
+glColor3f 1.0 1.0 1.0
+glMatrixMode $GL_PROJECTION
+glLoadIdentity
+glOrtho -1 1 -1 1 -1 1
+glMatrixMode $GL_MODELVIEW
+glLoadIdentity
+glClear $GL_COLOR_BUFFER_BIT
+glClear $GL_DEPTH_BUFFER_BIT
+auxSolidTorus 0.10 0.50
+
