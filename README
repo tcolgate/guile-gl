@@ -1,0 +1,8 @@
+
+Guile-GL
+========
+
+  Guile GL is a wrapper for  the MESA GL libraries for GNU Guile.
+It is intended to provide a convenient wrapper for OpenGL developement
+in Guile.
+

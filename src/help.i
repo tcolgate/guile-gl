@@ -11,7 +11,8 @@ typedef void (*voidFuncIntIntIntInt)(int,int,int,int);
 typedef void (*voidFuncUIntIntIntInt)(unsigned int,int,int,int);
 typedef void (*voidFuncUCharIntInt)(unsigned char,int,int);
 
-void TrampolineVoid (SCM P)
+void
+TrampolineVoid (ffi_cif *CIF, void *RET, void **args, void *SCM_HANDLER)
 {
 
   if (!scm_is_eq (scm_thunk_p (P), SCM_BOOL_T)){
@@ -23,290 +24,193 @@ void TrampolineVoid (SCM P)
   return;
 };
 
-void TrampolineInt (SCM P, int arg1)
-{
-
-  if (!scm_is_eq (scm_procedure_p (P), SCM_BOOL_T)){
-    printf ("Wont call, not a Void (int) procedure %p\n",P);
-    return;
-  }
-
-  scm_call_1(P,scm_int2num(arg1));
-  return;
-};
-
-void TrampolineIntInt (SCM P, int arg1, int arg2)
-{
-
-  if (!scm_is_eq (scm_procedure_p (P), SCM_BOOL_T)){
-    printf ("Wont call, not a Void (int,int) procedure %p\n",P);
-    return;
-  }
-
-  scm_call_2(P,scm_int2num(arg1),scm_int2num(arg2));
-  return;
-};
-
-void TrampolineIntIntInt (SCM P, int arg1, int arg2, int arg3)
-{
-
-  if (!scm_is_eq (scm_procedure_p (P), SCM_BOOL_T)){
-    printf ("Wont call, not a Void (int,int,int) procedure %p\n",P);
-    return;
-  }
-
-  scm_call_3(P,scm_int2num(arg1),scm_int2num(arg2),scm_int2num(arg3));
-  return;
-};
-
-void TrampolineUCharIntInt (SCM P, unsigned char arg1, int arg2, int arg3)
-{
-
-  if (!scm_is_eq (scm_procedure_p (P), SCM_BOOL_T)){
-    printf ("Wont call %p\n",P);
-    return;
-  }
-
-  scm_call_3(P,SCM_MAKE_CHAR(arg1),scm_int2num(arg2),scm_int2num(arg3));
-  return;
-};
-
-void TrampolineIntIntIntInt (SCM P, int arg1, int arg2, int arg3, int arg4)
-{
-
-  if (!scm_is_eq (scm_procedure_p (P), SCM_BOOL_T)){
-    printf ("Wont call %p\n",P);
-    return;
-  }
-
-  scm_call_4(P,scm_int2num(arg1),scm_int2num(arg2),scm_int2num(arg3),scm_int2num(arg4));
-  return;
-};
-
-void TrampolineUIntIntIntInt (SCM P, unsigned int arg1, int arg2, int arg3, int arg4)
-{
-
-  if (!scm_is_eq (scm_procedure_p (P), SCM_BOOL_T)){
-    printf ("Wont call %p\n",P);
-    return;
-  }
-
-  scm_call_4(P,scm_uint2num(arg1),scm_int2num(arg2),scm_int2num(arg3),scm_int2num(arg4));
-  return;
-};
-
 voidFuncVoid MakeSCMCallback_V_V(SCM p)
 {
   voidFuncVoid    callback;             /* ptr to generated code */
-  char          *start, *end;           /* a couple of labels */
+  ffi_cif *cif = (ffi_cif*) malloc (sizeof(ffi_cif));
+  void *cb_closure = ffi_closure_alloc (sizeof(ffi_closure), (void*) &callback);
 
-  jit_insn *codegen = (jit_insn*) malloc (1024);
-  callback = (voidFuncVoid) (jit_set_ip(codegen).vptr);
-  start = jit_get_ip().ptr;
-  jit_prolog(0);
-  jit_movi_p(JIT_R0, p);
-  jit_prepare(1);
-    jit_pusharg_p(JIT_R0);
-  jit_finish(TrampolineVoid);
-  jit_ret();
-  end = jit_get_ip().ptr;
+  /* Initialize the cif */
+  if (ffi_prep_cif(cif, FFI_DEFAULT_ABI, 0, &ffi_type_void, NULL)
+          != FFI_OK) {
+       printf("Failed to intialize cif for callback\n");
+  }
 
-  jit_flush_code(start, end);
-
+  ffi_prep_closure_loc (cb_closure, cif, TrampolineRtFunc, (void *)p, (void*) callback);
   return callback;
+
+};
+
+
+void 
+TrampolineInt (ffi_cif *CIF, void *RET, void **args, void *SCM_HANDLER)
+{
 };
 
 voidFuncInt MakeSCMCallback_V_I(SCM p)
 {
-  voidFuncInt callback;             /* ptr to generated code */
-  char          *start, *end;           /* a couple of labels */
+  void* parg1 = args[0];
   int arg1;
+  arg1 = *(int*)parg1;
+  voidFuncInt callback;             /* ptr to generated code */
 
-  jit_insn *codegen = (jit_insn*) malloc (1024);
-  callback = (voidFuncInt) (jit_set_ip(codegen).vptr);
-  start = jit_get_ip().ptr;
-  jit_prolog(1);
-  arg1 = jit_arg_i();
-  jit_movi_p(JIT_R0, p);
-  jit_getarg_i(JIT_R1, arg1);
-  jit_prepare(2);
-    jit_pusharg_i(JIT_R1);
-    jit_pusharg_p(JIT_R0);
-  jit_finish(TrampolineInt);
-  jit_ret();
-  end = jit_get_ip().ptr;
+  ffi_cif *cif = (ffi_cif*) malloc (sizeof(ffi_cif));
+  void *cb_closure = ffi_closure_alloc (sizeof(ffi_closure), (void*) &callback);
 
-  jit_flush_code(start, end);
+  /* Initialize the cif */
+  if (ffi_prep_cif(cif, FFI_DEFAULT_ABI, 1, &ffi_type_void, NULL)
+          != FFI_OK) {
+       printf("Failed to intialize cif for callback\n");
+  }
 
+  ffi_prep_closure_loc (cb_closure, cif, TrampolineRtFunc, (void *)p, (void*) callback);
   return callback;
+
+};
+void 
+TrampolineIntInt (ffi_cif *CIF, void *RET, void **args, void *SCM_HANDLER)
+{
 };
 
 voidFuncIntInt MakeSCMCallback_V_II(SCM p)
 {
   voidFuncIntInt callback;             /* ptr to generated code */
-  char          *start, *end;           /* a couple of labels */
+  void* parg1 = args[0];
+  void* parg2 = args[1];
   int arg1;
   int arg2;
+  arg1 = *(int*)parg1;
+  arg2 = *(int*)parg2;
 
-  jit_insn *codegen = (jit_insn*) malloc (1024);
-  callback = (voidFuncIntInt) (jit_set_ip(codegen).vptr);
-  start = jit_get_ip().ptr;
-  jit_prolog(2);
-  arg1 = jit_arg_i();
-  arg2 = jit_arg_i();
-  jit_movi_p(JIT_R0, p);
-  jit_getarg_i(JIT_R1, arg1);
-  jit_getarg_i(JIT_R2, arg2);
-  jit_prepare(3);
-    jit_pusharg_i(JIT_R2);
-    jit_pusharg_i(JIT_R1);
-    jit_pusharg_p(JIT_R0);
-  jit_finish(TrampolineIntInt);
-  jit_ret();
-  end = jit_get_ip().ptr;
+  ffi_cif *cif = (ffi_cif*) malloc (sizeof(ffi_cif));
+  void *cb_closure = ffi_closure_alloc (sizeof(ffi_closure), (void*) &callback);
 
-  jit_flush_code(start, end);
+  /* Initialize the cif */
+  if (ffi_prep_cif(cif, FFI_DEFAULT_ABI, 2, &ffi_type_void, NULL)
+          != FFI_OK) {
+       printf("Failed to intialize cif for callback\n");
+  }
 
+  ffi_prep_closure_loc (cb_closure, cif, TrampolineRtFunc, (void *)p, (void*) callback);
   return callback;
+
+};
+void 
+TrampolineIntIntInt (ffi_cif *CIF, void *RET, void **args, void *SCM_HANDLER)
+{
 };
 
 voidFuncIntIntInt MakeSCMCallback_V_III(SCM p)
 {
   voidFuncIntIntInt callback;             /* ptr to generated code */
-  char          *start, *end;           /* a couple of labels */
+  void* parg1 = args[0];
+  void* parg2 = args[1];
+  void* parg3 = args[2];
   int arg1;
   int arg2;
   int arg3;
+  arg1 = *(int*)parg1;
+  arg2 = *(int*)parg2;
+  arg3 = *(int*)parg3;
+  
+  ffi_cif *cif = (ffi_cif*) malloc (sizeof(ffi_cif));
+  void *cb_closure = ffi_closure_alloc (sizeof(ffi_closure), (void*) &callback);
+  
+  /* Initialize the cif */
+  if (ffi_prep_cif(cif, FFI_DEFAULT_ABI, 2, &ffi_type_void, NULL)
+          != FFI_OK) {
+       printf("Failed to intialize cif for callback\n");
+  }
 
-  jit_insn *codegen = (jit_insn*) malloc (1024);
-  callback = (voidFuncIntIntInt) (jit_set_ip(codegen).vptr);
-  start = jit_get_ip().ptr;
-  jit_prolog(3);
-  arg1 = jit_arg_i();
-  arg2 = jit_arg_i();
-  arg3 = jit_arg_i();
-  jit_movi_p(JIT_R0, p);
-  jit_prepare(4);
-    jit_getarg_i(JIT_R1, arg3);
-    jit_pusharg_i(JIT_R1);
-    jit_getarg_i(JIT_R1, arg2);
-    jit_pusharg_i(JIT_R1);
-    jit_getarg_i(JIT_R1, arg1);
-    jit_pusharg_i(JIT_R1);
-    jit_pusharg_p(JIT_R0);
-  jit_finish(TrampolineIntIntInt);
-  jit_ret();
-  end = jit_get_ip().ptr;
-
-  jit_flush_code(start, end);
-
+  ffi_prep_closure_loc (cb_closure, cif, TrampolineRtFunc, (void *)p, (void*) callback);
   return callback;
 };
 
-voidFuncUCharIntInt MakeSCMCallback_V_CII(SCM p)
+
+void 
+TrampolineCharIntInt (ffi_cif *CIF, void *RET, void **args, void *SCM_HANDLER)
 {
-  voidFuncUCharIntInt callback;             /* ptr to generated code */
-  char          *start, *end;           /* a couple of labels */
-  unsigned char arg1;
-  int arg2;
-  int arg3;
-
-  jit_insn *codegen = (jit_insn*) malloc (1024);
-  callback = (voidFuncUCharIntInt) (jit_set_ip(codegen).vptr);
-  start = jit_get_ip().ptr;
-  jit_prolog(3);
-  arg1 = jit_arg_uc();
-  arg2 = jit_arg_i();
-  arg3 = jit_arg_i();
-  jit_movi_p(JIT_R0, p);
-  jit_prepare(4);
-    jit_getarg_i(JIT_R1, arg3);
-    jit_pusharg_i(JIT_R1);
-    jit_getarg_i(JIT_R1, arg2);
-    jit_pusharg_i(JIT_R1);
-    jit_getarg_uc(JIT_R1, arg1);
-    jit_pusharg_uc(JIT_R1);
-    jit_pusharg_p(JIT_R0);
-  jit_finish(TrampolineUCharIntInt);
-  jit_ret();
-  end = jit_get_ip().ptr;
-
-  jit_flush_code(start, end);
-
-  return callback;
 };
 
 voidFuncIntIntIntInt MakeSCMCallback_V_IIII(SCM p)
 {
   voidFuncIntIntIntInt callback;             /* ptr to generated code */
-  char          *start, *end;           /* a couple of labels */
+  void* parg1 = args[0];
+  void* parg2 = args[1];
   int arg1;
   int arg2;
-  int arg3;
-  int arg4;
+  arg1 = *(int*)parg1;
+  arg2 = *(int*)parg2;
+  
+  ffi_cif *cif = (ffi_cif*) malloc (sizeof(ffi_cif));
+  void *cb_closure = ffi_closure_alloc (sizeof(ffi_closure), (void*) &callback);
+  
+  /* Initialize the cif */
+  if (ffi_prep_cif(cif, FFI_DEFAULT_ABI, 2, &ffi_type_void, NULL)
+          != FFI_OK) {
+       printf("Failed to intialize cif for callback\n");
+  }
 
-  jit_insn *codegen = (jit_insn*) malloc (1024);
-  callback = (voidFuncIntIntIntInt) (jit_set_ip(codegen).vptr);
-  start = jit_get_ip().ptr;
-  jit_prolog(4);
-  arg1 = jit_arg_i();
-  arg2 = jit_arg_i();
-  arg3 = jit_arg_i();
-  arg4 = jit_arg_i();
-  jit_movi_p(JIT_R0, p);
-  jit_prepare(5);
-  jit_getarg_i(JIT_R1, arg4);
-    jit_pusharg_i(JIT_R1);
-  jit_getarg_i(JIT_R1, arg3);
-    jit_pusharg_i(JIT_R1);
-  jit_getarg_i(JIT_R1, arg2);
-    jit_pusharg_i(JIT_R1);
-  jit_getarg_i(JIT_R1, arg1);
-    jit_pusharg_i(JIT_R1);
-    jit_pusharg_p(JIT_R0);
-  jit_finish(TrampolineIntIntIntInt);
-  jit_ret();
-  end = jit_get_ip().ptr;
-
-  jit_flush_code(start, end);
-
+  ffi_prep_closure_loc (cb_closure, cif, TrampolineRtFunc, (void *)p, (void*) callback);
   return callback;
+};
+
+
+void
+TrampolineIntIntIntInt (ffi_cif *CIF, void *RET, void **args, void *SCM_HANDLER)
+{
 };
 
 voidFuncUIntIntIntInt MakeSCMCallback_V_UIII(SCM p)
 {
   voidFuncUIntIntIntInt callback;             /* ptr to generated code */
-  char          *start, *end;           /* a couple of labels */
-  unsigned int arg1;
+  void* parg1 = args[0];
+  void* parg2 = args[1];
+  int arg1;
   int arg2;
-  int arg3;
-  int arg4;
+  arg1 = *(int*)parg1;
+  arg2 = *(int*)parg2;
+  
+  ffi_cif *cif = (ffi_cif*) malloc (sizeof(ffi_cif));
+  void *cb_closure = ffi_closure_alloc (sizeof(ffi_closure), (void*) &callback);
+  
+  /* Initialize the cif */
+  if (ffi_prep_cif(cif, FFI_DEFAULT_ABI, 2, &ffi_type_void, NULL)
+          != FFI_OK) {
+       printf("Failed to intialize cif for callback\n");
+  }
 
-  jit_insn *codegen = (jit_insn*) malloc (1024);
-  callback = (voidFuncUIntIntIntInt) (jit_set_ip(codegen).vptr);
-  start = jit_get_ip().ptr;
-  jit_prolog(4);
-  arg1 = jit_arg_ui();
-  arg2 = jit_arg_i();
-  arg3 = jit_arg_i();
-  arg4 = jit_arg_i();
-  jit_movi_p(JIT_R0, p);
-  jit_prepare(5);
-  jit_getarg_i(JIT_R1, arg4);
-    jit_pusharg_i(JIT_R1);
-  jit_getarg_i(JIT_R1, arg3);
-    jit_pusharg_i(JIT_R1);
-  jit_getarg_i(JIT_R1, arg2);
-    jit_pusharg_i(JIT_R1);
-  jit_getarg_ui(JIT_R1, arg1);
-    jit_pusharg_ui(JIT_R1);
-    jit_pusharg_p(JIT_R0);
-  jit_finish(TrampolineUIntIntIntInt);
-  jit_ret();
-  end = jit_get_ip().ptr;
+  ffi_prep_closure_loc (cb_closure, cif, TrampolineRtFunc, (void *)p, (void*) callback);
+  return callback;
+};
 
-  jit_flush_code(start, end);
 
+void 
+TrampolineUIntIntIntInt (ffi_cif *CIF, void *RET, void **args, void *SCM_HANDLER)
+{
+};
+
+
+voidFuncUIntIntIntInt MakeSCMCallback_V_UIII(SCM p)
+{
+  voidFuncUIntIntIntInt callback;             /* ptr to generated code */
+  void* parg1 = args[0];
+  void* parg2 = args[1];
+  int arg1;
+  int arg2;
+  arg1 = *(int*)parg1;
+  arg2 = *(int*)parg2;
+  
+  ffi_cif *cif = (ffi_cif*) malloc (sizeof(ffi_cif));
+  void *cb_closure = ffi_closure_alloc (sizeof(ffi_closure), (void*) &callback);
+  
+  /* Initialize the cif */
+  if (ffi_prep_cif(cif, FFI_DEFAULT_ABI, 2, &ffi_type_void, NULL)
+          != FFI_OK) {
+       printf("Failed to intialize cif for callback\n");
+  }
+
+  ffi_prep_closure_loc (cb_closure, cif, TrampolineRtFunc, (void *)p, (void*) callback);
   return callback;
 };
 
