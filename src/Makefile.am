@@ -14,17 +14,17 @@ glu_wrap.c: glu.i help.i
 glut_wrap.c: glut.i help.i
 	$(SWIG) $(SWIG_FLAGS) -module glut -o $@ $<
 
-libguile_opengl_gl_la_CFLAGS=-I../lightning
+libguile_opengl_gl_la_CFLAGS=@FFI_CFLAGS@
 libguile_opengl_gl_la_SOURCES=gl_wrap.c
-libguile_opengl_gl_la_LDFLAGS=-module
+libguile_opengl_gl_la_LDFLAGS=-module @FFI_LIBS@
 
-libguile_opengl_glu_la_CFLAGS=-I../lightning
+libguile_opengl_glu_la_CFLAGS=@FFI_CFLAGS@
 libguile_opengl_glu_la_SOURCES=glu_wrap.c
-libguile_opengl_glu_la_LDFLAGS=-module
+libguile_opengl_glu_la_LDFLAGS=-module @FFI_LIBS@
 
-libguile_opengl_glut_la_CFLAGS=-I../lightning
+libguile_opengl_glut_la_CFLAGS=@FFI_CFLAGS@
 libguile_opengl_glut_la_SOURCES=glut_wrap.c
-libguile_opengl_glut_la_LDFLAGS=-module
+libguile_opengl_glut_la_LDFLAGS=-module @FFI_LIBS@
 
 EXTRA_DIST = opengl opengl/gl.scm opengl/glu.scm opengl/glut.scm
 guilegldir =  @GUILE_SITE@/opengl
