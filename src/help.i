@@ -185,7 +185,7 @@ voidFuncIntIntInt MakeSCMCallback_V_III(SCM p)
 
 %{
 void 
-TrampolineCharIntInt (ffi_cif *CIF, void *RET, void **args, void *SCM_HANDLER)
+TrampolineUCharIntInt (ffi_cif *CIF, void *RET, void **args, void *SCM_HANDLER)
 {
   void* parg1 = args[0];
   void* parg2 = args[1];
@@ -208,15 +208,15 @@ TrampolineCharIntInt (ffi_cif *CIF, void *RET, void **args, void *SCM_HANDLER)
              scm_int2num((int) arg3));
   return;
 };
-voidFuncCharIntInt MakeSCMCallback_V_CII(SCM p)
+voidFuncUCharIntInt MakeSCMCallback_V_CII(SCM p)
 {
   ffi_cif *cif = (ffi_cif*) malloc (sizeof(ffi_cif));
   ffi_type **args = (ffi_type**) malloc (sizeof(ffi_type*) * 3);
-  voidFuncCharIntInt callback;             /* ptr to generated code */
+  voidFuncUCharIntInt callback;             /* ptr to generated code */
   void *cb_closure = ffi_closure_alloc (sizeof(ffi_closure), (void*) &callback);
 
   /* Describe the arguments */
-  args[0] = &ffi_type_char;
+  args[0] = &ffi_type_uchar;
   args[1] = &ffi_type_sint;
   args[2] = &ffi_type_sint;
 
@@ -226,7 +226,7 @@ voidFuncCharIntInt MakeSCMCallback_V_CII(SCM p)
        printf("Failed to intialize cif for callback\n");
   }
 
-  ffi_prep_closure_loc (cb_closure, cif, TrampolineCharIntInt, (void *)p, (void*) callback);
+  ffi_prep_closure_loc (cb_closure, cif, TrampolineUCharIntInt, (void *)p, (void*) callback);
   return callback;
 };
 %}
