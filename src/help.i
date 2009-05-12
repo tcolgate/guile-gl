@@ -230,7 +230,7 @@ voidFuncUCharIntInt MakeSCMCallback_V_CII(SCM p)
   return callback;
 };
 %}
-%typemap(in)( void (* callback)( int, int, int, int ) ){
+%typemap(in)( void (* callback)( unsigned char, int, int ) ){
   $1 = MakeSCMCallback_V_CII($input);
 }
 
@@ -286,7 +286,7 @@ voidFuncIntIntIntInt MakeSCMCallback_V_IIII(SCM p)
   return callback;
 };
 %}
-%typemap(in)( void (* callback)( unsigned char, int, int ) ){
+%typemap(in)( void (* callback)( int, int, int, int ) ){
   $1 = MakeSCMCallback_V_IIII($input);
 }
 
@@ -346,7 +346,7 @@ voidFuncUIntIntIntInt MakeSCMCallback_V_UIII(SCM p)
   $1 = MakeSCMCallback_V_UIII($input);
 }
 
-%{
+%inline %{
 int *newintv1(int a){
   int *i;
   i = (int *) malloc(sizeof(int));
