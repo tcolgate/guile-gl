@@ -1,9 +1,9 @@
 #!/usr/bin/guile -s
 !#
 
-(use-modules (GL gl))
-(use-modules (GL glu))
-(use-modules (GL glut))
+(use-modules (opengl gl))
+(use-modules (opengl glu))
+(use-modules (opengl glut))
 
 (define argcp (newintv1 1))
 (define argvp (newstrv1 "tester"))
