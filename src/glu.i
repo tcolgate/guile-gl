@@ -22,6 +22,8 @@ typedef double          GLclampd;
 
 %include <GL/glu.h>
 
-%goops %{ (load-extension "libguile_opengl_glu.so" "scm_init_opengl_glu_module")%}
+%goops %{
+(eval-when (eval load compile)
+  (load-extension "libguile_opengl_glu.so" "scm_init_opengl_glu_module"))%}
 
 

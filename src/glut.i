@@ -62,6 +62,8 @@ typedef double          GLclampd;
 %include <GL/freeglut.h>
 %include <GL/glut.h>
 
-%goops %{ (load-extension "libguile_opengl_glut.so" "scm_init_opengl_glut_module")%}
+%goops %{ 
+(eval-when (eval load compile)
+  (load-extension "libguile_opengl_glut.so" "scm_init_opengl_glut_module"))%}
 
 
