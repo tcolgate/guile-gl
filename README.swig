@@ -1,0 +1,3 @@
+This build requires a customized version of swig available at...
+
+https://github.com/tcolgate/swig-guile2

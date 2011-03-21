@@ -14,8 +14,23 @@ AC_SUBST(FFI_CFLAGS)
 AC_SUBST(FFI_LIBS)
 AC_CONFIG_HEADER(config.h)
 AC_CONFIG_MACRO_DIR([m4])
+
 GUILE_PROGS
 GUILE_FLAGS
+GUILE_PREFIX=`$GUILE_CONFIG info prefix`
+AC_SUBST(GUILE_PREFIX)
+
+if $GUILE_TOOLS | grep -q compile; then
+   GUILE_COMPILE="$GUILE_TOOLS compile"
+   HAVE_GUILE_COMPILE=1
+else
+   GUILE_COMPILE=""
+   HAVE_GUILE_COMPILE=0
+fi
+
+AC_SUBST(GUILE_COMPILE)
+AM_CONDITIONAL(HAVE_GUILE_COMPILE, test "$HAVE_GUILE_COMPILE" = 1)
+
 GUILE_SITE_DIR
 
 # Checks for libraries.
@@ -32,6 +47,7 @@ AC_CHECK_LIB([glut], [glutInit])
 
 # Checks for library functions.
 
+AC_CONFIG_FILES([build-environ], [chmod +x build-environ])
 AC_CONFIG_FILES([Makefile])
 AC_CONFIG_FILES([src/Makefile])
 AC_OUTPUT
