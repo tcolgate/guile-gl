@@ -30,3 +30,4 @@ src/.libs
 src/Makefile
 config.sub
 config.guess
+*.go
